@@ -10,7 +10,7 @@
 <div class="catalog">
     <CatalogSearch BrandId="@BrandId" ItemTypeId="@ItemTypeId" />
 
-    @if (catalogResult is null)
+    @if (catalogItems is null)
     {
         <p>Loading...</p>
     }
@@ -18,14 +18,10 @@
     {
         <div>
             <div class="catalog-items">
-                @foreach (var item in catalogResult.Data)
-                {
-                    <CatalogListItem Item="@item" />
-                }
-            </div>
+<Component />            </div>
 
             <div class="page-links">
-                @foreach (var pageIndex in GetVisiblePageIndexes(catalogResult))
+                @foreach (var pageIndex in GetVisiblePageIndexes())
                 {
                     <NavLink ActiveClass="active-page" Match="@NavLinkMatch.All" href="@Nav.GetUriWithQueryParameter("page", pageIndex == 1 ? null : pageIndex)">@pageIndex</NavLink>
                 }
@@ -46,14 +42,18 @@
     [SupplyParameterFromQuery(Name = "type")]
     public int? ItemTypeId { get; set; }
 
-    CatalogResult? catalogResult;
+    List<CatalogItemObject>? catalogItems;
 
-    static IEnumerable<int> GetVisiblePageIndexes(CatalogResult result)
-        => Enumerable.Range(1, (int)Math.Ceiling(1.0 * result.Count / PageSize));
+    IEnumerable<int> GetVisiblePageIndexes()
+    {
+        int itemCount = catalogItems?.Count ?? 0; // Use 0 if catalogItems is null
+        int totalPages = (int)Math.Ceiling(1.0 * itemCount / PageSize);
+        return Enumerable.Range(1, totalPages);
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        catalogResult = await CatalogService.GetCatalogItems(
+        catalogItems = await CatalogService.GetCatalogItems(
             Page.GetValueOrDefault(1) - 1,
             PageSize,
             BrandId,

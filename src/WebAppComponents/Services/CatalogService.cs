@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Reflection.Metadata.Ecma335;
 using System.Web;
 using eShop.WebAppComponents.Catalog;
 
@@ -14,12 +15,15 @@ public class CatalogService(HttpClient httpClient) : ICatalogService
         return httpClient.GetFromJsonAsync<CatalogItem>(uri);
     }
 
-    public async Task<CatalogResult> GetCatalogItems(int pageIndex, int pageSize, int? brand, int? type)
+    public async Task<List<CatalogItemObject>> GetCatalogItems(int pageIndex, int pageSize, int? brand, int? type)
     {
         var uri = GetAllCatalogItemsUri(remoteServiceBaseUrl, pageIndex, pageSize, brand, type);
         var result = await httpClient.GetFromJsonAsync<CatalogResult>(uri);
-        return result!;
+
+        var newRes = result?.Data.Select(item => new CatalogItemObject(item)).ToList() ?? new List<CatalogItemObject>();
+        return newRes; 
     }
+
 
     public async Task<List<CatalogItem>> GetCatalogItems(IEnumerable<int> ids)
     {
