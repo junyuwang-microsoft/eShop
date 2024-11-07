@@ -75,4 +75,9 @@ public class CatalogService(HttpClient httpClient) : ICatalogService
 
         return $"{baseUri}items{filterQs}?pageIndex={pageIndex}&pageSize={pageSize}";
     }
+
+    private static void LoggingInfo(CatalogLogger logger)
+    {
+        logger.LogInfo("CatalogService is working");
+    }
 }
